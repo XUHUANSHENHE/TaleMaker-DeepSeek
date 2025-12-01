@@ -27,6 +27,10 @@
                 <button @click="toggleApiKeyVisibility" class="btn-secondary">
                   {{ showApiKey ? '隐藏' : '显示' }}
                 </button>
+                <!-- 新增：获取密钥按钮 -->
+                <button @click="goToGetAPIKey" class="btn-secondary get-key-btn">
+                  获取密钥
+                </button>
               </div>
             </div>
           </div>
@@ -34,17 +38,7 @@
           <!-- 基础设定 -->
           <div class="config-section basic-config">
             <h3>⚙️ 基础设定</h3>
-            <div class="input-group">
-              <label for="worldView">世界观设定:</label>
-              <textarea 
-                id="worldView"
-                v-model="worldView" 
-                placeholder="例如：这是一个奇幻的魔法世界，存在各种种族和魔法体系..."
-                class="textarea-field"
-                rows="3"
-              ></textarea>
-            </div>
-            
+
             <div class="input-group">
               <label for="perspective">人称视角:</label>
               <select v-model="perspective" id="perspective" class="select-field">
@@ -54,13 +48,24 @@
                 <option value="上帝视角">上帝视角</option>
               </select>
             </div>
+
+            <div class="input-group">
+              <label for="worldView">世界观设定:</label>
+              <textarea 
+                id="worldView"
+                v-model="worldView" 
+                placeholder="示例：修仙世界观（可以详细描述）"
+                class="textarea-field"
+                rows="3"
+              ></textarea>
+            </div>
             
             <div class="input-group">
               <label for="additionalInfo">其他信息:</label>
               <textarea 
                 id="additionalInfo"
                 v-model="additionalInfo" 
-                placeholder="例如：语言风格偏向古典，注重环境描写和心理刻画..."
+                placeholder="提示：语言风格/特殊用词等其他要求"
                 class="textarea-field"
                 rows="2"
               ></textarea>
@@ -87,7 +92,7 @@
                 <input 
                   id="chapterName"
                   v-model="chapterName" 
-                  placeholder="可选，如：命运的相遇"
+                  placeholder="非必填"
                   class="input-field"
                 />
               </div>
@@ -96,18 +101,20 @@
             <!-- 角色管理 -->
             <div class="input-group">
               <label>角色配置:</label>
-              <div v-for="(character, index) in characters" :key="index" class="character-item">
+              <div v-for="(character, index) in characters" :key="index" class="character-juese">
                 <input 
                   v-model="character.name"
                   placeholder="角色姓名"
                   class="input-field small"
                 />
+    
                 <textarea 
                   v-model="character.setting"
                   placeholder="角色设定"
                   class="textarea-field small"
                   rows="2"
                 ></textarea>
+  
                 <button @click="removeCharacter(index)" class="btn-danger">删除</button>
               </div>
               <button @click="addCharacter" class="btn-secondary">添加角色</button>
@@ -123,6 +130,18 @@
                 class="textarea-field"
                 rows="3"
               ></textarea>
+            </div>
+
+            <!-- 参数管理按钮 -->
+            <div class="input-group">
+              <div class="parameter-actions">
+                <button @click="saveCurrentParameters" class="btn-secondary">
+                  保存当前参数
+                </button>
+                <button @click="resetParameters" class="btn-danger">
+                  重置参数
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -150,6 +169,12 @@
           </div>
         </div>
         <div class="module-content">
+          <!-- 导入状态指示器 -->
+          <div v-if="isImporting" class="importing-indicator">
+            <div class="spinner"></div>
+            <p>正在导入数据，请稍候...</p>
+          </div>
+          
           <!-- 生成状态指示器 -->
           <div v-if="isGenerating" class="generating-indicator">
             <div class="spinner"></div>
@@ -214,18 +239,28 @@
       <section class="module history">
         <div class="module-header">
           <h2>已生成内容</h2>
-          <button 
-            v-if="history.length > 0"
-            @click="downloadAllChapters"
-            class="btn-primary"
-          >
-            下载全本
-          </button>
+          <div class="header-actions">
+            <button 
+              v-if="history.length > 0"
+              @click="downloadAllChapters"
+              class="btn-primary"
+            >
+              下载全本
+            </button>
+            <!-- 新增：导入全本按钮 -->
+            <button 
+              @click="importAllChapters"
+              class="btn-secondary"
+            >
+              导入全本
+            </button>
+          </div>
         </div>
         <div class="module-content">
           <div v-if="history.length === 0" class="placeholder">
             <div class="placeholder-icon">📚</div>
             <p>暂无历史记录</p>
+            <p>生成的章节将显示在这里</p>
           </div>
           
           <div v-else class="history-list">
@@ -235,13 +270,17 @@
               class="history-item"
               :class="{ 
                 active: selectedHistoryIndex === index,
-                edited: item.isEdited 
+                edited: item.isEdited,
+                imported: item.imported 
               }"
               @click="selectHistoryItem(index)"
             >
               <div class="history-item-header">
                 <h4>{{ item.chapterTitle }}</h4>
-                <span v-if="item.isEdited" class="edited-badge">已编辑</span>
+                <div class="item-badges">
+                  <span v-if="item.isEdited" class="edited-badge">已编辑</span>
+                  <span v-if="item.imported" class="imported-badge">已导入</span>
+                </div>
               </div>
               <p class="preview-text">{{ getContentPreview(item.content) }}</p>
               <p class="meta-info">
@@ -282,9 +321,9 @@ export default {
       showApiKey: false,
       
       // 基础设定
-      worldView: '这是一个奇幻的魔法世界，存在各种种族和魔法体系...',
+      worldView: '',
       perspective: '第三人称',
-      additionalInfo: '语言风格偏向古典，注重环境描写和心理刻画...',
+      additionalInfo: '',
       
       // 章节配置
       chapterNumber: 1,
@@ -311,7 +350,13 @@ export default {
       
       // 历史记录
       history: [],
-      selectedHistoryIndex: -1
+      selectedHistoryIndex: -1,
+      
+      // 新增：参数版本控制
+      parametersVersion: '1.0',
+      
+      // 新增：导入文件相关
+      isImporting: false
     };
   },
   computed: {
@@ -335,13 +380,79 @@ export default {
       });
     }
   },
+  watch: {
+    // 监听主要参数变化并自动保存
+    worldView(newVal) {
+      if (newVal !== undefined) {
+        this.debouncedSaveParameters();
+      }
+    },
+    perspective(newVal) {
+      if (newVal !== undefined) {
+        this.debouncedSaveParameters();
+      }
+    },
+    additionalInfo(newVal) {
+      if (newVal !== undefined) {
+        this.debouncedSaveParameters();
+      }
+    },
+    chapterNumber(newVal) {
+      if (newVal !== undefined) {
+        this.debouncedSaveParameters();
+      }
+    },
+    chapterName(newVal) {
+      if (newVal !== undefined) {
+        this.debouncedSaveParameters();
+      }
+    },
+    plotRequirement(newVal) {
+      if (newVal !== undefined) {
+        this.debouncedSaveParameters();
+      }
+    },
+    characters: {
+      handler(newVal) {
+        if (newVal !== undefined) {
+          this.debouncedSaveParameters();
+        }
+      },
+      deep: true
+    }
+  },
   mounted() {
     this.loadHistory();
+    this.loadAllParameters();
+  },
+  created() {
+    // 创建防抖的保存函数
+    this.debouncedSaveParameters = this.debounce(() => {
+      this.saveAllParameters();
+    }, 1000);
   },
   methods: {
+    // 防抖函数
+    debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    },
+    
     // API密钥显示切换
     toggleApiKeyVisibility() {
       this.showApiKey = !this.showApiKey;
+    },
+    
+    // 跳转到获取API密钥页面
+    goToGetAPIKey() {
+      window.open('https://platform.deepseek.com/usage', '_blank');
     },
     
     // 角色管理
@@ -355,18 +466,99 @@ export default {
       }
     },
     
+    // 保存所有参数到本地存储
+    saveAllParameters() {
+      const parameters = {
+        version: this.parametersVersion,
+        apiKey: this.apiKey,
+        worldView: this.worldView,
+        perspective: this.perspective,
+        additionalInfo: this.additionalInfo,
+        chapterNumber: this.chapterNumber,
+        chapterName: this.chapterName,
+        characters: JSON.parse(JSON.stringify(this.characters)),
+        plotRequirement: this.plotRequirement,
+        savedAt: new Date().toISOString()
+      };
+      
+      try {
+        localStorage.setItem('novelParameters', JSON.stringify(parameters));
+        console.log('参数已保存到本地存储');
+      } catch (error) {
+        console.error('保存参数失败:', error);
+      }
+    },
+    
+    // 手动保存当前参数
+    saveCurrentParameters() {
+      this.saveAllParameters();
+      alert('参数已保存！');
+    },
+    
+    // 重置参数
+    resetParameters() {
+      if (confirm('确定要重置所有参数吗？这将清除当前的配置。')) {
+        this.worldView = '';
+        this.perspective = '第三人称';
+        this.additionalInfo = '';
+        this.chapterNumber = 1;
+        this.chapterName = '';
+        this.characters = [{ name: '', setting: '' }];
+        this.plotRequirement = '';
+        
+        // 清除本地存储的参数
+        localStorage.removeItem('novelParameters');
+        alert('参数已重置！');
+      }
+    },
+    
+    // 加载保存的参数
+    loadAllParameters() {
+      try {
+        const saved = localStorage.getItem('novelParameters');
+        if (saved) {
+          const parameters = JSON.parse(saved);
+          
+          // 检查版本兼容性
+          if (parameters.version === this.parametersVersion) {
+            this.apiKey = parameters.apiKey || '';
+            this.worldView = parameters.worldView || '';
+            this.perspective = parameters.perspective || '第三人称';
+            this.additionalInfo = parameters.additionalInfo || '';
+            this.chapterNumber = parameters.chapterNumber || 1;
+            this.chapterName = parameters.chapterName || '';
+            this.characters = parameters.characters && parameters.characters.length > 0 
+              ? parameters.characters 
+              : [{ name: '', setting: '' }];
+            this.plotRequirement = parameters.plotRequirement || '';
+            
+            console.log('参数已从本地存储加载');
+            return true;
+          } else {
+            console.warn('参数版本不兼容，使用默认参数');
+          }
+        }
+      } catch (error) {
+        console.error('加载参数失败:', error);
+      }
+      return false;
+    },
+    
     // 生成小说
     async generateNovel() {
       if (!this.canGenerate) return;
       
+      // 在生成前保存参数
+      this.saveAllParameters();
+      
       this.isGenerating = true;
       this.currentContent = null;
-      this.displayedContent = ''; // 清空显示内容
+      this.displayedContent = '';
       this.currentStats = {
         characterCount: 0,
         chineseCount: 0
       };
-      this.isEditing = false; // 退出编辑模式
+      this.isEditing = false;
       
       try {
         // 构建配置
@@ -527,7 +719,7 @@ export default {
       this.editingContent = this.currentContent.content;
       this.originalContent = this.currentContent.content;
       this.isEditing = true;
-      this.editingIndex = -1; // 表示编辑的是当前预览内容，不是历史项
+      this.editingIndex = -1;
     },
     
     // 保存编辑内容
@@ -606,13 +798,82 @@ export default {
         return;
       }
       
-      // 按章节号排序
+      // 询问导出格式
+      const format = confirm('是否导出为JSON格式（包含参数和历史记录）？\n点击"确定"导出JSON，点击"取消"导出TXT')
+        ? 'json'
+        : 'txt';
+      
+      if (format === 'json') {
+        this.downloadAsJson();
+      } else {
+        this.downloadAsTxt();
+      }
+    },
+    
+    // 导出为JSON格式
+    downloadAsJson() {
+      const exportData = {
+        format: 'novel-full-export',
+        version: '1.0',
+        exportedAt: new Date().toISOString(),
+        generator: 'TaleMaker DS便捷小说生成器',
+        
+        // 包含当前参数
+        parameters: {
+          apiKey: '', // 出于安全考虑，不导出API密钥
+          worldView: this.worldView,
+          perspective: this.perspective,
+          additionalInfo: this.additionalInfo,
+          chapterNumber: this.chapterNumber,
+          chapterName: this.chapterName,
+          characters: JSON.parse(JSON.stringify(this.characters)),
+          plotRequirement: this.plotRequirement
+        },
+        
+        // 包含所有历史记录
+        history: this.sortedHistory.map(item => ({
+          chapterTitle: item.chapterTitle,
+          content: item.content,
+          characterCount: item.characterCount,
+          chineseCount: item.chineseCount,
+          timestamp: item.timestamp,
+          isEdited: item.isEdited || false,
+          imported: item.imported || false,
+          config: item.config || {}
+        })),
+        
+        // 统计信息
+        statistics: {
+          totalChapters: this.history.length,
+          totalCharacters: this.history.reduce((sum, item) => sum + item.characterCount, 0),
+          totalChineseCharacters: this.history.reduce((sum, item) => sum + item.chineseCount, 0)
+        }
+      };
+      
+      // 创建JSON字符串
+      const jsonStr = JSON.stringify(exportData, null, 2);
+      
+      // 创建下载
+      const blob = new Blob([jsonStr], { 
+        type: 'application/json;charset=utf-8' 
+      });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `小说全本_${this.history.length}章_${new Date().toISOString().slice(0,10)}.json`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+      
+      alert('已导出JSON格式全本，可后续导入恢复数据');
+    },
+    
+    // 原有的TXT格式导出
+    downloadAsTxt() {
       const sortedChapters = this.sortedHistory;
       
-      // 构建完整小说内容
       let fullContent = `《小说全本》\n\n`;
       fullContent += `生成时间: ${new Date().toLocaleString()}\n`;
-      fullContent += `总章节数: ${sortedChapters.length}\n\n`;
+      fullContent += `总章节数: ${sortedChapters.length}\n`;
+      fullContent += `生成工具: TaleMaker DS便捷小说生成器\n\n`;
       fullContent += '='.repeat(50) + '\n\n';
       
       sortedChapters.forEach((chapter, index) => {
@@ -625,6 +886,9 @@ export default {
         if (chapter.isEdited) {
           fullContent += ' | 已编辑';
         }
+        if (chapter.imported) {
+          fullContent += ' | 已导入';
+        }
         fullContent += ']\n\n';
       });
       
@@ -636,7 +900,6 @@ export default {
       fullContent += `总章节数: ${sortedChapters.length}\n`;
       fullContent += `总字符数: ${totalChars}\n`;
       fullContent += `总中文字符: ${totalChinese}\n`;
-      fullContent += `生成工具: TaleMaker DS便捷小说生成器\n`;
       
       const blob = new Blob([fullContent], { type: 'text/plain;charset=utf-8' });
       const link = document.createElement('a');
@@ -644,6 +907,171 @@ export default {
       link.download = `小说全本_${sortedChapters.length}章.txt`;
       link.click();
       URL.revokeObjectURL(link.href);
+    },
+    
+    // 导入全本功能
+    importAllChapters() {
+      // 创建文件输入元素
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json,.txt';
+      input.style.display = 'none';
+      
+      input.onchange = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        this.isImporting = true;
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const content = e.target.result;
+            this.processImportedFile(content, file.name);
+          } catch (error) {
+            console.error('导入失败:', error);
+            alert('导入失败: ' + error.message);
+          } finally {
+            this.isImporting = false;
+            // 清理输入元素
+            document.body.removeChild(input);
+          }
+        };
+        
+        reader.onerror = () => {
+          alert('读取文件失败');
+          this.isImporting = false;
+          document.body.removeChild(input);
+        };
+        
+        reader.readAsText(file);
+      };
+      
+      document.body.appendChild(input);
+      input.click();
+    },
+    
+    // 处理导入的文件
+    processImportedFile(content, filename) {
+      try {
+        // 尝试解析为JSON
+        const data = JSON.parse(content);
+        
+        // 检查数据格式
+        if (data.format === 'novel-full-export') {
+          // 导入全本格式
+          this.importFullNovelData(data);
+        } else if (data.parameters) {
+          // 可能是旧版格式，尝试导入参数
+          this.importLegacyFormat(data);
+        } else {
+          // 可能是纯文本，作为单个章节导入
+          this.importAsSingleChapter(content, filename);
+        }
+      } catch (jsonError) {
+        // JSON解析失败，作为纯文本导入
+        console.log('非JSON格式，尝试作为文本导入');
+        this.importAsSingleChapter(content, filename);
+      }
+    },
+    
+    // 导入全本数据（新版格式）
+    importFullNovelData(data) {
+      // 验证必要字段
+      if (!data.parameters || !data.history) {
+        throw new Error('文件格式不正确，缺少必要字段');
+      }
+      
+      // 恢复参数
+      if (confirm('是否恢复保存的配置参数？')) {
+        this.worldView = data.parameters.worldView || '';
+        this.perspective = data.parameters.perspective || '第三人称';
+        this.additionalInfo = data.parameters.additionalInfo || '';
+        this.chapterNumber = data.parameters.chapterNumber || 1;
+        this.chapterName = data.parameters.chapterName || '';
+        this.characters = data.parameters.characters && data.parameters.characters.length > 0 
+          ? data.parameters.characters 
+          : [{ name: '', setting: '' }];
+        this.plotRequirement = data.parameters.plotRequirement || '';
+        
+        // 保存参数到本地存储
+        this.saveAllParameters();
+      }
+      
+      // 恢复历史记录
+      if (confirm(`是否导入 ${data.history.length} 个章节到历史记录？`)) {
+        this.history = data.history.map(item => ({
+          ...item,
+          // 确保必要字段存在
+          isEdited: item.isEdited || false,
+          imported: true,
+          timestamp: item.timestamp || new Date().toISOString()
+        }));
+        
+        // 保存历史记录
+        this.saveHistory();
+        
+        alert(`成功导入 ${this.history.length} 个章节！`);
+        
+        // 如果有历史记录，默认选中第一个
+        if (this.history.length > 0) {
+          this.selectHistoryItem(0);
+        }
+      }
+    },
+    
+    // 导入旧版格式
+    importLegacyFormat(data) {
+      if (data.parameters) {
+        // 导入参数
+        this.worldView = data.parameters.worldView || '';
+        this.perspective = data.parameters.perspective || '第三人称';
+        this.additionalInfo = data.parameters.additionalInfo || '';
+        this.chapterNumber = data.parameters.chapterNumber || 1;
+        this.chapterName = data.parameters.chapterName || '';
+        this.characters = data.parameters.characters && data.parameters.characters.length > 0 
+          ? data.parameters.characters 
+          : [{ name: '', setting: '' }];
+        this.plotRequirement = data.parameters.plotRequirement || '';
+        
+        this.saveAllParameters();
+        alert('配置参数已恢复！');
+      }
+    },
+    
+    // 导入为单个章节
+    importAsSingleChapter(content, filename) {
+      // 从文件名提取章节信息
+      const chapterMatch = filename.match(/(第\d+章)?(.*)\.(json|txt)/i);
+      const chapterTitle = chapterMatch 
+        ? (chapterMatch[1] || '') + (chapterMatch[2] || '导入章节')
+        : '导入章节';
+      
+      // 创建新的历史记录项
+      const newHistoryItem = {
+        chapterTitle: chapterTitle,
+        content: content,
+        characterCount: content.length,
+        chineseCount: countChineseCharacters(content),
+        timestamp: new Date().toISOString(),
+        isEdited: false,
+        imported: true,
+        config: {
+          worldView: this.worldView,
+          perspective: this.perspective,
+          characters: this.characters,
+          plotRequirement: this.plotRequirement
+        }
+      };
+      
+      // 添加到历史记录
+      this.history.push(newHistoryItem);
+      this.saveHistory();
+      
+      // 自动选中新导入的章节
+      this.selectHistoryItem(this.history.length - 1);
+      
+      alert(`已导入章节: ${chapterTitle}`);
     },
     
     // 内容预览
@@ -665,10 +1093,11 @@ export default {
       const saved = localStorage.getItem('novelHistory');
       if (saved) {
         const history = JSON.parse(saved);
-        // 兼容旧数据：添加 isEdited 字段
+        // 兼容旧数据：添加必要字段
         this.history = history.map(item => ({
           ...item,
-          isEdited: item.isEdited || false
+          isEdited: item.isEdited || false,
+          imported: item.imported || false
         }));
       }
     }
@@ -677,7 +1106,70 @@ export default {
 </script>
 
 <style scoped>
-/* 添加流式显示的特殊样式 */
+/* 新增样式 */
+.get-key-btn {
+  background: linear-gradient(135deg, #9b59b6, #8e44ad);
+  color: white;
+}
+
+.get-key-btn:hover {
+  background: linear-gradient(135deg, #8e44ad, #7d3c98);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(155, 89, 182, 0.3);
+}
+
+.parameter-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+/* 导入状态指示器 */
+.importing-indicator {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.95);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.importing-indicator .spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+/* 历史记录中的导入标记 */
+.history-item.imported {
+  border-left-color: #9b59b6;
+}
+
+.imported-badge {
+  background: #9b59b6;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-left: 8px;
+}
+
+.item-badges {
+  display: flex;
+  gap: 5px;
+}
+
+/* 流式显示的特殊样式 */
 .streaming-text {
   line-height: 1.8;
   font-family: 'Georgia', serif;
@@ -712,6 +1204,7 @@ export default {
   align-items: center;
   margin-bottom: 15px;
   padding-bottom: 10px;
+  padding: 10px;
   border-bottom: 1px solid #eee;
 }
 
@@ -721,8 +1214,9 @@ export default {
 }
 
 .content-textarea {
-  width: 100%;
+  width: 90%;
   min-height: 400px;
+  margin: 10px;
   padding: 15px;
   border: 1px solid #ddd;
   border-radius: 6px;
@@ -910,6 +1404,7 @@ label {
 }
 
 .input-field, .textarea-field, .select-field {
+  box-sizing: border-box;
   width: 100%;
   padding: 10px 12px;
   border: 1px solid #ddd;
@@ -933,6 +1428,11 @@ label {
 
 .input-field.small, .textarea-field.small {
   font-size: 13px;
+  margin: 5px;
+}
+
+.input-field.small{
+  width: 50%;
 }
 
 .input-with-button {
@@ -946,15 +1446,13 @@ label {
 }
 
 /* 角色项样式 */
-.character-item {
+.character-juese {
   background: white;
   padding: 12px;
   border-radius: 6px;
   margin-bottom: 12px;
   border: 1px solid #e1e8ed;
   display: grid;
-  grid-template-columns: 1fr 2fr auto;
-  gap: 10px;
   align-items: start;
 }
 
@@ -967,7 +1465,7 @@ label {
   font-size: 14px;
   font-weight: 600;
   transition: all 0.3s;
-  margin: 0 5px;
+  margin: 0px;
 }
 
 .btn-primary {
@@ -1182,7 +1680,7 @@ label {
     grid-template-columns: 1fr;
   }
   
-  .character-item {
+  .character-juese {
     grid-template-columns: 1fr;
     gap: 8px;
   }
@@ -1218,6 +1716,10 @@ label {
   
   .edit-actions {
     align-self: flex-end;
+  }
+  
+  .parameter-actions {
+    flex-direction: column;
   }
 }
 </style>

@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 
 // 统计中文字符数量
-function countChineseCharacters(str) {
+export function countChineseCharacters(str) {
     if (!str) return 0;
     const regex = /[\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF\u20000-\u2A6DF]/gu;
     const matches = str.match(regex);
@@ -18,7 +18,7 @@ function createOpenAIClient(apiKey) {
 }
 
 // 构建系统配置
-function buildSystemConfig(worldView, perspective, additionalInfo) {
+export function buildSystemConfig(worldView, perspective, additionalInfo) {
     const config = {
         "设定": "你是一个专业的小说创作助手，请根据用户要求生成高质量的小说章节内容。",
         "世界观设定": worldView,
@@ -40,7 +40,7 @@ function buildSystemConfig(worldView, perspective, additionalInfo) {
 }
 
 // 构建用户配置
-function buildUserConfig(chapterNumber, chapterName, plotRequirement, characters, history = "") {
+export function buildUserConfig(chapterNumber, chapterName, plotRequirement, characters, history = "") {
     const config = {
         "章节信息": `第${chapterNumber}章${chapterName ? `：${chapterName}` : ''}`,
         "情节要求": plotRequirement || "请根据世界观设定自然发展情节"
@@ -178,7 +178,7 @@ export async function processStream(stream, onContentUpdate) {
                         content: fullContent,
                         chineseCount: chineseCount,
                         characterCount: characterCount,
-                        incrementalContent: content // 新增：传递增量内容
+                        incrementalContent: content
                     });
                 }
                 
@@ -271,12 +271,6 @@ export function validateConfig(apiKey, worldView, perspective, chapterNumber) {
         errors
     };
 }
-
-export {
-    buildSystemConfig,
-    buildUserConfig,
-    countChineseCharacters
-};
 
 export default {
     generateContent,
