@@ -2,7 +2,7 @@
   <div class="app-container">
     <!-- 导航栏 -->
     <header class="header">
-      <h1>TaleMaker DS便捷小说生成器</h1>
+      <h1>DeepSeek 无限制小说生成框架</h1>
     </header>
 
     <!-- 主体内容 -->
@@ -21,7 +21,7 @@
                   id="apiKey"
                   v-model="apiKey" 
                   :type="showApiKey ? 'text' : 'password'" 
-                  placeholder="请输入您的DeepSeek API密钥"
+                  placeholder="请输入您的key"
                   class="input-field"
                 />
                 <button @click="toggleApiKeyVisibility" class="btn-secondary">
@@ -54,7 +54,7 @@
               <textarea 
                 id="worldView"
                 v-model="worldView" 
-                placeholder="示例：修仙世界观（可以详细描述）"
+                placeholder="架空/现实/修仙 可详细设定"
                 class="textarea-field"
                 rows="3"
               ></textarea>
@@ -65,7 +65,7 @@
               <textarea 
                 id="additionalInfo"
                 v-model="additionalInfo" 
-                placeholder="提示：语言风格/特殊用词等其他要求"
+                placeholder="语言风格/特殊用词等其他要求"
                 class="textarea-field"
                 rows="2"
               ></textarea>
@@ -92,7 +92,6 @@
                 <input 
                   id="chapterName"
                   v-model="chapterName" 
-                  placeholder="非必填"
                   class="input-field"
                 />
               </div>
