@@ -1,5 +1,98 @@
 <template>
-  <div class="app-container">
+  <!-- 用户协议弹窗 -->
+  <div v-if="showAgreementModal" class="agreement-modal-overlay">
+    <div class="agreement-modal">
+      <div class="modal-header">
+        <h2>📜 DeepSeek 小说生成框架 用户协议与免责声明</h2>
+        <div class="scroll-progress">
+          <div class="progress-bar">
+            <div class="progress-fill" :style="{ width: scrollProgress + '%' }"></div>
+          </div>
+          <span class="progress-text">已阅读 {{ Math.round(scrollProgress) }}%</span>
+        </div>
+      </div>
+      
+      <div class="modal-content" @scroll="onModalScroll">
+        <div class="agreement-content">
+          <div class="important-note">
+            <p><strong>重要提示：</strong>在访问或使用本网站（以下简称"本站"或"工具"）提供的服务前，请您务必仔细阅读并充分理解本协议各项内容。一旦您开始使用本服务，即表示您已完全同意并接受本协议的所有条款。如果您不同意本协议的任何内容，请立即停止使用本服务。</p>
+          </div>
+
+          <section class="agreement-section">
+            <h3>一、 服务性质</h3>
+            <p><strong>1.1</strong> 本站是一个技术工具平台，为用户提供一个便捷的前端界面，以帮助用户通过其自行获取的、合法的第三方人工智能API密钥生成文本内容。</p>
+            <p><strong>1.2</strong> 本站不提供任何人工智能大模型服务，不拥有、不运营也不代表任何AI API提供商。所有计算、内容生成和最终输出均由用户选择的第三方AI服务提供商完成。</p>
+            <p><strong>1.3</strong> 本站不存储、不缓存、不备份用户通过本工具生成的任何文本内容。所有生成内容仅在您的浏览器会话中临时显示，由您自行负责保存或处理。</p>
+          </section>
+
+          <section class="agreement-section">
+            <h3>二、 用户义务与行为规范</h3>
+            <p><strong>2.1 API密钥责任：</strong>您确认并保证，您在本站使用的所有API密钥均为您本人合法获取，并已遵守相关API提供商的服务条款。您独自承担因您的API密钥使用（包括但不限于泄露、盗用、超额消费等）引发的一切后果。</p>
+            
+            <p><strong>2.2 内容合法性：</strong>您承诺使用本服务生成的所有内容必须遵守您所在国家/地区以及服务涉及国家/地区的所有适用法律法规。您严格禁止使用本服务生成以下内容，包括但不限于：</p>
+            <ul class="prohibited-list">
+              <li><strong>危害国家安全：</strong>煽动分裂国家、破坏国家统一、泄露国家秘密、颠覆国家政权、推翻社会主义制度的内容。</li>
+              <li><strong>恐怖主义与暴力：</strong>宣扬恐怖主义、极端主义，煽动民族仇恨、民族歧视，渲染暴力、血腥的内容。</li>
+              <li><strong>淫秽色情：</strong>制作、传播淫秽、色情，特别是涉及未成年人的色情内容。</li>
+              <li><strong>欺诈与虚假信息：</strong>制作、传播虚假信息，扰乱经济秩序和社会秩序，侵犯他人知识产权、商业秘密的内容。</li>
+              <li><strong>侮辱诽谤：</strong>侮辱或者诽谤他人，侵害他人名誉、隐私、肖像权等合法权益的内容。</li>
+              <li><strong>其他违法信息：</strong>法律、行政法规禁止的其他任何内容。</li>
+            </ul>
+            
+            <p><strong>2.3 禁止规避审查：</strong>您明确承诺，不得以任何形式利用本工具旨在规避或破坏任何第三方AI服务提供商内置的内容安全策略、审查机制或使用限制。您理解，任何此类行为均直接违反了相关API提供商的服务条款，可能导致您的API密钥被永久封禁，且您需自行承担由此产生的一切责任。</p>
+          </section>
+
+          <section class="agreement-section">
+            <h3>三、 免责声明</h3>
+            <p><strong>3.1 内容责任豁免：</strong>由于本站不参与、不控制、不干预具体的文本生成过程，且不存储任何生成内容，因此本站对用户生成的任何内容的合法性、准确性、完整性、适用性及产生的任何直接或间接后果，不承担任何法律责任。所有由生成内容引发的一切争议、法律责任均由用户本人独立承担。</p>
+            <p><strong>3.2 服务稳定性：</strong>本站尽力为您提供稳定的技术服务，但对于服务的中断、终止或出现的缺陷，本站不承担责任。技术服务依赖于第三方API，其稳定性与可用性不在本站控制范围内。</p>
+            <p><strong>3.3 间接损失：</strong>在任何情况下，本站均不对任何间接性、后果性、惩罚性、偶然性的损害（包括但不限于利润损失、数据丢失、业务中断等）承担责任。</p>
+          </section>
+
+          <section class="agreement-section">
+            <h3>四、 侵权投诉与用户违规处理</h3>
+            <p><strong>4.1</strong> 不知道 <a href="" class="contact-link"></a> </p>
+            <p><strong>4.2</strong> 如果我们自行发现或根据第三方投诉/通知，认定用户违反了本协议的规定，特别是第二章中的禁止性条款，我们有权立即终止向该用户提供服务，且不承担任何责任。</p>
+          </section>
+
+          <section class="agreement-section">
+            <h3>五、 其他</h3>
+            <p><strong>5.1</strong> 本站保留随时修改本协议条款的权利。修改后的协议将在本站公布后立即生效。您继续使用本服务即视为接受修改后的协议。</p>
+            <p><strong>5.2</strong> 本协议的订立、执行和解释及争议的解决均应适用中华人民共和国法律。如双方就本协议内容或其执行发生任何争议，应首先友好协商解决；协商不成时，双方同意将争议提交至本站运营方所在地有管辖权的人民法院诉讼解决。</p>
+          </section>
+
+          <div class="agreement-footer">
+            <p class="effective-date">最后更新日期：2025年12月</p>
+            <p class="contact-info">如有疑问，请联系：不知道</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <div class="footer-note">
+          <p><strong>注意：</strong>请完整阅读并理解以上所有条款内容。滚动到底部后"同意并继续"按钮将可用。</p>
+          <button v-if="isScrollingModal" @click="scrollToBottom" class="btn-scroll-bottom">
+            📜 快速滚动到底部
+          </button>
+        </div>
+        <div class="footer-actions">
+          <button @click="rejectAgreement" class="btn-reject">
+            拒绝并离开
+          </button>
+          <button 
+            @click="acceptAgreement" 
+            :disabled="isScrollingModal"
+            :class="{ 'btn-agree': true, 'disabled': isScrollingModal }"
+          >
+            {{ isScrollingModal ? '请阅读完整内容' : '✅ 同意并继续使用' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主应用容器 -->
+  <div class="app-container" :class="{ 'blurred': showAgreementModal }">
     <!-- 导航栏 -->
     <header class="header">
       <h1>DeepSeek 无限制小说生成框架</h1>
@@ -500,13 +593,13 @@ export default {
       
       // 生成状态
       isGenerating: false,
-      generationProgress: 0, // 新增：生成进度
-      generationTimer: null, // 新增：进度计时器
+      generationProgress: 0,
+      generationTimer: null,
       currentContent: null,
-      currentReasoning: '', // 新增：存储思维链内容
-      displayedContent: '', // 实时显示的内容
-      displayedReasoning: '', // 新增：实时显示的思维链内容
-      activeTab: 'final', // 当前激活的选项卡
+      currentReasoning: '',
+      displayedContent: '',
+      displayedReasoning: '',
+      activeTab: 'final',
       currentStats: {
         characterCount: 0,
         chineseCount: 0
@@ -518,18 +611,23 @@ export default {
       // 编辑状态
       isEditing: false,
       editingContent: '',
-      editingIndex: -1, // 正在编辑的历史项索引
-      originalContent: '', // 编辑前的原始内容
+      editingIndex: -1,
+      originalContent: '',
       
       // 历史记录
       history: [],
       selectedHistoryIndex: -1,
       
       // 新增：参数版本控制
-      parametersVersion: '1.1', // 更新版本号以支持思维链
+      parametersVersion: '1.1',
       
       // 新增：导入文件相关
-      isImporting: false
+      isImporting: false,
+      
+      // 新增：用户协议状态
+      showAgreementModal: false,
+      isScrollingModal: false,
+      scrollProgress: 0
     };
   },
   computed: {
@@ -543,7 +641,6 @@ export default {
       return `第${this.chapterNumber}章${this.chapterName ? `: ${this.chapterName}` : ''}`;
     },
     sortedHistory() {
-      // 按章节号排序
       return [...this.history].sort((a, b) => {
         const getChapterNum = (title) => {
           const match = title.match(/第(\d+)章/);
@@ -555,19 +652,15 @@ export default {
     availableTabs() {
       const tabs = [];
       
-      // 根据显示方式决定显示的选项卡
       if (this.reasoningDisplay === 'combined') {
-        // 合并显示：只显示合并视图
         if (this.currentContent && this.currentReasoning) {
           tabs.push({ id: 'combined', label: '合并视图', available: true });
         } else if (this.isGenerating) {
           tabs.push({ id: 'combined', label: '合并视图', available: true });
         }
       } else if (this.reasoningDisplay === 'hide') {
-        // 隐藏思维链：只显示最终内容
         tabs.push({ id: 'final', label: '最终内容', available: true });
       } else {
-        // 单独显示：显示最终内容和思维链
         tabs.push({ id: 'final', label: '最终内容', available: true });
         if (this.currentReasoning || this.isGenerating) {
           tabs.push({ id: 'reasoning', label: '思维链', available: !!this.currentReasoning });
@@ -584,7 +677,6 @@ export default {
     }
   },
   watch: {
-    // 监听模型变化，如果模型不是reasoner，则禁用思维链
     model(newModel) {
       if (newModel !== 'deepseek-reasoner') {
         this.enableReasoning = false;
@@ -594,9 +686,7 @@ export default {
       }
     },
     
-    // 监听思维链显示方式变化
     reasoningDisplay(newValue) {
-      // 根据显示方式自动切换选项卡
       if (newValue === 'combined') {
         this.activeTab = 'combined';
       } else if (newValue === 'hide') {
@@ -606,11 +696,9 @@ export default {
       }
     },
     
-    // 监听主要参数变化并自动保存
     worldView(newVal) {
       if (newVal !== undefined) {
         this.debouncedSaveParameters();
-        // 自动调整高度
         this.$nextTick(() => {
           this.initTextareaHeights();
         });
@@ -624,7 +712,6 @@ export default {
     additionalInfo(newVal) {
       if (newVal !== undefined) {
         this.debouncedSaveParameters();
-        // 自动调整高度
         this.$nextTick(() => {
           this.initTextareaHeights();
         });
@@ -643,7 +730,6 @@ export default {
     plotRequirement(newVal) {
       if (newVal !== undefined) {
         this.debouncedSaveParameters();
-        // 自动调整高度
         this.$nextTick(() => {
           this.initTextareaHeights();
         });
@@ -653,7 +739,6 @@ export default {
       handler(newVal) {
         if (newVal !== undefined) {
           this.debouncedSaveParameters();
-          // 自动调整角色设定框高度
           this.$nextTick(() => {
             this.initTextareaHeights();
           });
@@ -677,7 +762,6 @@ export default {
       }
     },
     
-    // 监听生成状态
     isGenerating(isGenerating) {
       if (isGenerating) {
         this.startGenerationProgress();
@@ -689,44 +773,97 @@ export default {
   mounted() {
     this.loadHistory();
     this.loadAllParameters();
-    // 初始化所有自动调整的textarea高度
     this.$nextTick(() => {
       this.initTextareaHeights();
     });
   },
   created() {
-    // 创建防抖的保存函数
+    // 检查是否已接受协议
+    const savedAgreement = localStorage.getItem('novelGeneratorAgreement');
+    if (savedAgreement === 'accepted') {
+      // 已接受协议，正常显示应用
+    } else {
+      // 未接受协议，显示协议弹窗
+      this.showAgreementModal = true;
+      document.body.style.overflow = 'hidden';
+    }
+    
     this.debouncedSaveParameters = this.debounce(() => {
       this.saveAllParameters();
     }, 1000);
   },
   methods: {
+    // 用户协议相关方法
+    acceptAgreement() {
+      const modalContent = document.querySelector('.modal-content');
+      if (modalContent) {
+        const isAtBottom = modalContent.scrollHeight - modalContent.scrollTop <= modalContent.clientHeight + 10;
+        
+        if (!isAtBottom) {
+          alert('请先阅读完整的用户协议内容至底部，然后才能同意。');
+          return;
+        }
+      }
+      
+      this.showAgreementModal = false;
+      localStorage.setItem('novelGeneratorAgreement', 'accepted');
+      
+      // 恢复滚动
+      document.body.style.overflow = '';
+      document.body.style.overflowX = '';
+      document.body.style.overflowY = '';
+    },
+    
+    onModalScroll(event) {
+      const modalContent = event.target;
+      const scrollTop = modalContent.scrollTop;
+      const scrollHeight = modalContent.scrollHeight;
+      const clientHeight = modalContent.clientHeight;
+      
+      const progress = (scrollTop / (scrollHeight - clientHeight)) * 100;
+      this.scrollProgress = Math.min(100, Math.max(0, progress));
+      
+      this.isScrollingModal = scrollHeight - scrollTop > clientHeight + 50;
+    },
+    
+    rejectAgreement() {
+      alert('您必须同意用户协议才能使用DeepSeek小说生成框架。');
+      // 即使拒绝，也要恢复滚动，让用户可以重新访问
+      document.body.style.overflow = '';
+      document.body.style.overflowX = '';
+      document.body.style.overflowY = '';
+      this.showAgreementModal = false;
+    },
+    
+    scrollToBottom() {
+      const modalContent = document.querySelector('.modal-content');
+      if (modalContent) {
+        modalContent.scrollTop = modalContent.scrollHeight;
+        this.scrollProgress = 100;
+        this.isScrollingModal = false;
+      }
+    },
+    
     // 自动调整textarea高度
     autoResize(event, minHeight = 60, maxHeight = 400) {
       const textarea = event.target;
       
-      // 保存当前滚动位置（防止页面跳动）
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
       
-      // 重置高度以便正确计算scrollHeight
       textarea.style.height = 'auto';
       
-      // 计算新高度
       let newHeight = textarea.scrollHeight + 2;
       newHeight = Math.max(minHeight, newHeight);
       newHeight = Math.min(maxHeight, newHeight);
       
-      // 应用新高度
       textarea.style.height = `${newHeight}px`;
       
-      // 控制滚动条显示
       if (newHeight >= maxHeight) {
         textarea.style.overflowY = 'auto';
       } else {
         textarea.style.overflowY = 'hidden';
       }
       
-      // 恢复滚动位置
       window.scrollTo(0, scrollTop);
     },
     
@@ -735,7 +872,6 @@ export default {
       this.$nextTick(() => {
         const textareas = document.querySelectorAll('.auto-resize');
         textareas.forEach(textarea => {
-          // 模拟input事件以触发调整
           const event = new Event('input', { bubbles: true });
           textarea.dispatchEvent(event);
         });
@@ -775,7 +911,6 @@ export default {
         clearInterval(this.generationTimer);
         this.generationTimer = null;
       }
-      // 完成后动画到100%
       if (this.generationProgress < 100) {
         const interval = setInterval(() => {
           if (this.generationProgress < 100) {
@@ -803,7 +938,6 @@ export default {
     // 角色管理
     addCharacter() {
       this.characters.push({ name: '', setting: '' });
-      // 添加角色后自动调整高度
       this.$nextTick(() => {
         this.initTextareaHeights();
       });
@@ -829,7 +963,7 @@ export default {
         chapterNumber: this.chapterNumber,
         chapterName: this.chapterName,
         characters: JSON.parse(JSON.stringify(this.characters)),
-        plotRequirement: this.plotRequirement,
+        plotRequirement:this.plotRequirement,
         savedAt: new Date().toISOString()
       };
       
@@ -861,10 +995,8 @@ export default {
         this.enableReasoning = true;
         this.reasoningDisplay = 'separate';
         
-        // 清除本地存储的参数
         localStorage.removeItem('novelParameters');
         
-        // 重置后调整textarea高度
         this.$nextTick(() => {
           this.initTextareaHeights();
         });
@@ -880,7 +1012,6 @@ export default {
         if (saved) {
           const parameters = JSON.parse(saved);
           
-          // 检查版本兼容性
           if (parameters.version === this.parametersVersion) {
             this.apiKey = parameters.apiKey || '';
             this.model = parameters.model || 'deepseek-reasoner';
@@ -896,7 +1027,6 @@ export default {
               : [{ name: '', setting: '' }];
             this.plotRequirement = parameters.plotRequirement || '';
             
-            // 根据配置设置默认激活的选项卡
             if (this.reasoningDisplay === 'combined') {
               this.activeTab = 'combined';
             } else if (this.reasoningDisplay === 'hide') {
@@ -905,7 +1035,6 @@ export default {
             
             console.log('参数已从本地存储加载');
             
-            // 加载参数后调整textarea高度
             this.$nextTick(() => {
               this.initTextareaHeights();
             });
@@ -925,7 +1054,6 @@ export default {
     async generateNovel() {
       if (!this.canGenerate) return;
       
-      // 在生成前保存参数
       this.saveAllParameters();
       
       this.isGenerating = true;
@@ -942,7 +1070,6 @@ export default {
       };
       this.isEditing = false;
       
-      // 根据显示方式设置初始选项卡
       if (this.reasoningDisplay === 'combined') {
         this.activeTab = 'combined';
       } else if (this.reasoningDisplay === 'hide') {
@@ -952,7 +1079,6 @@ export default {
       }
       
       try {
-        // 构建配置
         const systemConfig = buildSystemConfig(
           this.worldView,
           this.perspective,
@@ -974,7 +1100,6 @@ export default {
           enableReasoning: this.enableReasoning
         });
         
-        // 生成内容
         const stream = await generateContent({
           apiKey: this.apiKey,
           systemConfig,
@@ -983,40 +1108,32 @@ export default {
           enableReasoning: this.enableReasoning
         });
         
-        // 处理流式响应
         const result = await processStream(stream, (update) => {
-          // 更新统计信息
           this.currentStats = {
             characterCount: update.characterCount,
             chineseCount: update.chineseCount
           };
           
-          // 更新思维链统计
           if (update.reasoningContent) {
             this.reasoningStats.length = update.reasoningContent.length;
           }
           
-          // 实时更新显示内容
           this.displayedContent = update.content;
           
-          // 实时更新思维链内容
           if (update.reasoningContent) {
             this.displayedReasoning = update.reasoningContent;
           }
           
-          // 更新生成进度（基于内容长度）
           if (update.characterCount > 0) {
             this.generationProgress = Math.min(95, 10 + (update.characterCount / 2000) * 85);
           }
           
-          // 自动滚动到底部
           this.$nextTick(() => {
             this.scrollToBottom();
           });
         });
         
         if (result.success) {
-          // 保存最终内容
           this.currentContent = {
             chapterTitle: `第${this.chapterNumber}章${this.chapterName ? `: ${this.chapterName}` : ''}`,
             content: result.finalContent,
@@ -1034,21 +1151,17 @@ export default {
             }
           };
           
-          // 保存思维链内容
           if (result.reasoningContent) {
             this.currentReasoning = result.reasoningContent;
             
-            // 如果启用了合并显示，且用户选择了合并视图，创建合并内容
             if (this.reasoningDisplay === 'combined') {
               this.activeTab = 'combined';
             }
           }
           
-          // 确保显示最终内容
           this.displayedContent = result.finalContent;
           this.displayedReasoning = result.reasoningContent || '';
           
-          // 设置生成进度为完成
           this.generationProgress = 100;
           
           console.log('生成完成', this.currentContent);
@@ -1087,11 +1200,9 @@ export default {
     saveCurrentContent() {
       if (!this.currentContent) return;
       
-      // 更新统计信息
       this.currentContent.characterCount = this.currentContent.content.length;
       this.currentContent.chineseCount = countChineseCharacters(this.currentContent.content);
       
-      // 保存思维链内容
       if (this.currentReasoning) {
         this.currentContent.reasoningContent = this.currentReasoning;
       }
@@ -1108,7 +1219,6 @@ export default {
       this.displayedContent = '';
       this.displayedReasoning = '';
       this.isEditing = false;
-      // 根据当前显示方式重置选项卡
       if (this.reasoningDisplay === 'combined') {
         this.activeTab = 'combined';
       } else {
@@ -1134,7 +1244,6 @@ export default {
       };
       this.isEditing = false;
       
-      // 根据当前显示方式决定显示哪个选项卡
       if (this.reasoningDisplay === 'combined' && this.currentReasoning) {
         this.activeTab = 'combined';
       } else {
@@ -1203,7 +1312,6 @@ export default {
       const chineseCount = countChineseCharacters(this.editingContent);
       
       if (this.editingIndex >= 0) {
-        // 更新历史项
         this.history[this.editingIndex] = {
           ...this.history[this.editingIndex],
           content: this.editingContent,
@@ -1215,7 +1323,6 @@ export default {
         this.saveHistory();
         alert('修改已保存到历史记录！');
       } else {
-        // 更新当前预览内容
         this.currentContent.content = this.editingContent;
         this.currentContent.characterCount = characterCount;
         this.currentContent.chineseCount = chineseCount;
@@ -1298,7 +1405,6 @@ export default {
         return;
       }
       
-      // 询问导出格式
       const format = confirm('是否导出为JSON格式（包含参数和历史记录）？\n点击"确定"导出JSON，点击"取消"导出TXT')
         ? 'json'
         : 'txt';
@@ -1314,13 +1420,12 @@ export default {
     downloadAsJson() {
       const exportData = {
         format: 'novel-full-export',
-        version: '1.1', // 更新版本号
+        version: '1.1',
         exportedAt: new Date().toISOString(),
         generator: 'TaleMaker DS便捷小说生成器',
         
-        // 包含当前参数
         parameters: {
-          apiKey: '', // 出于安全考虑，不导出API密钥
+          apiKey: '',
           model: this.model,
           enableReasoning: this.enableReasoning,
           reasoningDisplay: this.reasoningDisplay,
@@ -1333,11 +1438,10 @@ export default {
           plotRequirement: this.plotRequirement
         },
         
-        // 包含所有历史记录
         history: this.sortedHistory.map(item => ({
           chapterTitle: item.chapterTitle,
           content: item.content,
-          reasoningContent: item.reasoningContent || '', // 新增思维链内容
+          reasoningContent: item.reasoningContent || '',
           characterCount: item.characterCount,
           chineseCount: item.chineseCount,
           timestamp: item.timestamp,
@@ -1346,7 +1450,6 @@ export default {
           config: item.config || {}
         })),
         
-        // 统计信息
         statistics: {
           totalChapters: this.history.length,
           totalCharacters: this.history.reduce((sum, item) => sum + item.characterCount, 0),
@@ -1355,10 +1458,8 @@ export default {
         }
       };
       
-      // 创建JSON字符串
       const jsonStr = JSON.stringify(exportData, null, 2);
       
-      // 创建下载
       const blob = new Blob([jsonStr], { 
         type: 'application/json;charset=utf-8' 
       });
@@ -1385,7 +1486,6 @@ export default {
       sortedChapters.forEach((chapter, index) => {
         fullContent += `${chapter.chapterTitle}\n\n`;
         
-        // 如果章节有思维链，可以选择包含
         if (chapter.reasoningContent && confirm(`章节"${chapter.chapterTitle}"有思维链内容，是否包含在导出文件中？`)) {
           fullContent += `【模型思考过程】\n${chapter.reasoningContent}\n\n`;
           fullContent += `【生成内容】\n`;
@@ -1394,7 +1494,6 @@ export default {
         fullContent += chapter.content + '\n\n';
         fullContent += '='.repeat(50) + '\n\n';
         
-        // 添加统计信息
         fullContent += `[本章统计: 字符数 ${chapter.characterCount} | 中文字符 ${chapter.chineseCount}`;
         if (chapter.isEdited) {
           fullContent += ' | 已编辑';
@@ -1408,7 +1507,6 @@ export default {
         fullContent += ']\n\n';
       });
       
-      // 添加总体统计
       const totalChars = sortedChapters.reduce((sum, chapter) => sum + chapter.characterCount, 0);
       const totalChinese = sortedChapters.reduce((sum, chapter) => sum + chapter.chineseCount, 0);
       
@@ -1428,7 +1526,6 @@ export default {
     
     // 导入全本功能
     importAllChapters() {
-      // 创建文件输入元素
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = '.json,.txt';
@@ -1450,7 +1547,6 @@ export default {
             alert('导入失败: ' + error.message);
           } finally {
             this.isImporting = false;
-            // 清理输入元素
             document.body.removeChild(input);
           }
         };
@@ -1471,22 +1567,16 @@ export default {
     // 处理导入的文件
     processImportedFile(content, filename) {
       try {
-        // 尝试解析为JSON
         const data = JSON.parse(content);
         
-        // 检查数据格式
         if (data.format === 'novel-full-export') {
-          // 导入全本格式
           this.importFullNovelData(data);
         } else if (data.parameters) {
-          // 可能是旧版格式，尝试导入参数
           this.importLegacyFormat(data);
         } else {
-          // 可能是纯文本，作为单个章节导入
           this.importAsSingleChapter(content, filename);
         }
       } catch (jsonError) {
-        // JSON解析失败，作为纯文本导入
         console.log('非JSON格式，尝试作为文本导入');
         this.importAsSingleChapter(content, filename);
       }
@@ -1494,12 +1584,10 @@ export default {
     
     // 导入全本数据（新版格式）
     importFullNovelData(data) {
-      // 验证必要字段
       if (!data.parameters || !data.history) {
         throw new Error('文件格式不正确，缺少必要字段');
       }
       
-      // 恢复参数
       if (confirm('是否恢复保存的配置参数？')) {
         this.model = data.parameters.model || 'deepseek-reasoner';
         this.enableReasoning = data.parameters.enableReasoning !== undefined ? data.parameters.enableReasoning : true;
@@ -1514,27 +1602,22 @@ export default {
           : [{ name: '', setting: '' }];
         this.plotRequirement = data.parameters.plotRequirement || '';
         
-        // 保存参数到本地存储
         this.saveAllParameters();
       }
       
-      // 恢复历史记录
       if (confirm(`是否导入 ${data.history.length} 个章节到历史记录？`)) {
         this.history = data.history.map(item => ({
           ...item,
-          // 确保必要字段存在
           isEdited: item.isEdited || false,
           imported: true,
           reasoningContent: item.reasoningContent || '',
           timestamp: item.timestamp || new Date().toISOString()
         }));
         
-        // 保存历史记录
         this.saveHistory();
         
         alert(`成功导入 ${this.history.length} 个章节！`);
         
-        // 如果有历史记录，默认选中第一个
         if (this.history.length > 0) {
           this.selectHistoryItem(0);
         }
@@ -1544,7 +1627,6 @@ export default {
     // 导入旧版格式
     importLegacyFormat(data) {
       if (data.parameters) {
-        // 导入参数
         this.model = data.parameters.model || 'deepseek-reasoner';
         this.enableReasoning = data.parameters.enableReasoning !== undefined ? data.parameters.enableReasoning : true;
         this.reasoningDisplay = data.parameters.reasoningDisplay || 'separate';
@@ -1565,13 +1647,11 @@ export default {
     
     // 导入为单个章节
     importAsSingleChapter(content, filename) {
-      // 从文件名提取章节信息
       const chapterMatch = filename.match(/(第\d+章)?(.*)\.(json|txt)/i);
       const chapterTitle = chapterMatch 
         ? (chapterMatch[1] || '') + (chapterMatch[2] || '导入章节')
         : '导入章节';
       
-      // 创建新的历史记录项
       const newHistoryItem = {
         chapterTitle: chapterTitle,
         content: content,
@@ -1580,7 +1660,7 @@ export default {
         timestamp: new Date().toISOString(),
         isEdited: false,
         imported: true,
-        reasoningContent: '', // 纯文本导入没有思维链
+        reasoningContent: '',
         config: {
           worldView: this.worldView,
           perspective: this.perspective,
@@ -1591,11 +1671,9 @@ export default {
         }
       };
       
-      // 添加到历史记录
       this.history.push(newHistoryItem);
       this.saveHistory();
       
-      // 自动选中新导入的章节
       this.selectHistoryItem(this.history.length - 1);
       
       alert(`已导入章节: ${chapterTitle}`);
@@ -1620,12 +1698,11 @@ export default {
       const saved = localStorage.getItem('novelHistory');
       if (saved) {
         const history = JSON.parse(saved);
-        // 兼容旧数据：添加必要字段
         this.history = history.map(item => ({
           ...item,
           isEdited: item.isEdited || false,
           imported: item.imported || false,
-          reasoningContent: item.reasoningContent || '' // 新增思维链字段
+          reasoningContent: item.reasoningContent || ''
         }));
       }
     }
@@ -1634,7 +1711,268 @@ export default {
 </script>
 
 <style scoped>
-/* 基础布局样式优化 */
+/* 用户协议弹窗样式 */
+.agreement-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(5px);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.agreement-modal {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 2px solid #3498db;
+  animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  background: linear-gradient(135deg, #2c3e50, #4a6572);
+  color: white;
+  padding: 20px 30px;
+  border-bottom: 3px solid #3498db;
+}
+
+.modal-header h2 {
+  margin: 0 0 15px 0;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.scroll-progress {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 10px 15px;
+  border-radius: 8px;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3498db, #9b59b6);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 14px;
+  font-weight: 600;
+  min-width: 100px;
+  text-align: right;
+}
+
+.modal-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 25px 30px;
+  background: #f8fafc;
+}
+
+.agreement-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.important-note {
+  background: #fff3cd;
+  border-left: 4px solid #ffc107;
+  padding: 15px 20px;
+  margin-bottom: 25px;
+  border-radius: 0 8px 8px 0;
+}
+
+.important-note strong {
+  color: #856404;
+}
+
+.agreement-section {
+  margin-bottom: 30px;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  border-left: 4px solid #3498db;
+}
+
+.agreement-section h3 {
+  color: #2c3e50;
+  margin-top: 0;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #eaeaea;
+}
+
+.agreement-section p {
+  line-height: 1.7;
+  margin-bottom: 12px;
+  color: #333;
+}
+
+.prohibited-list {
+  margin: 15px 0 15px 20px;
+  padding: 0;
+}
+
+.prohibited-list li {
+  margin-bottom: 10px;
+  line-height: 1.6;
+  padding-left: 5px;
+}
+
+.contact-link {
+  color: #3498db;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.contact-link:hover {
+  text-decoration: underline;
+}
+
+.agreement-footer {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 2px solid #eaeaea;
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+}
+
+.effective-date {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.contact-info {
+  margin-top: 5px;
+}
+
+.modal-footer {
+  background: #f8f9fa;
+  padding: 20px 30px;
+  border-top: 2px solid #eaeaea;
+}
+
+.footer-note {
+  text-align: center;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #e9ecef;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.footer-note strong {
+  color: #e74c3c;
+}
+
+.footer-actions {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.btn-reject {
+  padding: 12px 30px;
+  background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  min-width: 180px;
+}
+
+.btn-reject:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(149, 165, 166, 0.3);
+}
+
+.btn-agree {
+  padding: 12px 30px;
+  background: linear-gradient(135deg, #27ae60, #219a52);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  min-width: 200px;
+}
+
+.btn-agree:not(.disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+}
+
+.btn-agree.disabled {
+  background: linear-gradient(135deg, #bdc3c7, #95a5a6);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.btn-scroll-bottom {
+  padding: 8px 16px;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: all 0.3s;
+}
+
+.btn-scroll-bottom:hover {
+  background: #2980b9;
+  transform: translateY(-1px);
+}
+
+/* 主应用容器样式 */
 .app-container {
   min-height: 100vh;
   display: flex;
@@ -1644,8 +1982,16 @@ export default {
   overflow: hidden;
   height: 100vh;
   box-sizing: border-box;
+  transition: filter 0.3s ease;
 }
 
+.app-container.blurred {
+  filter: blur(5px);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* 基础布局样式优化 */
 .header {
   margin-bottom: 20px;
   padding: 20px;
@@ -1702,7 +2048,7 @@ export default {
   border-bottom: 2px solid #3498db;
   padding-bottom: 12px;
   flex-shrink: 0;
-  position: relative; /* 为悬浮提示定位 */
+  position: relative;
 }
 
 .module-header h2 {
@@ -1718,7 +2064,6 @@ export default {
   padding-right: 5px;
 }
 
-/* 隐藏滚动条但保留滚动功能 */
 .module-content::-webkit-scrollbar {
   width: 6px;
 }
@@ -1738,7 +2083,6 @@ export default {
   opacity: 1;
 }
 
-/* Firefox 隐藏滚动条 */
 .module-content {
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
@@ -1846,7 +2190,6 @@ export default {
   flex-shrink: 0;
 }
 
-/* 移除历史项的横向滚动效果 */
 .history-item:hover {
   background: #e9ecef;
   transform: translateY(-2px);
@@ -1935,7 +2278,6 @@ export default {
   position: relative;
 }
 
-/* 隐藏内容区域的滚动条 */
 .content-view::-webkit-scrollbar,
 .reasoning-view::-webkit-scrollbar,
 .combined-view::-webkit-scrollbar {
@@ -2236,7 +2578,6 @@ export default {
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
-/* 确保内容区域可滚动 */
 .content-text {
   max-height: 400px;
   overflow-y: auto;
@@ -2283,21 +2624,6 @@ export default {
   gap: 10px;
   align-items: center;
   position: relative;
-}
-
-.module-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  border-bottom: 2px solid #3498db;
-  padding-bottom: 12px;
-}
-
-.module-header h2 {
-  margin-bottom: 0;
-  border-bottom: none;
-  padding-bottom: 0;
 }
 
 /* 其他原有样式 */
@@ -2354,7 +2680,6 @@ label {
   max-height: 800px;
 }
 
-/* 自定义滚动条样式 */
 .textarea-field.auto-resize::-webkit-scrollbar,
 .content-textarea.auto-resize::-webkit-scrollbar {
   width: 6px;
@@ -2488,18 +2813,6 @@ label {
 .stats {
   color: #7f8c8d;
   font-size: 14px;
-}
-
-.content-display {
-  flex: 1;
-  margin-bottom: 20px;
-}
-
-.content-display h3 {
-  color: #2c3e50;
-  margin-bottom: 15px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #eee;
 }
 
 .content-stats {
@@ -2657,6 +2970,49 @@ label {
   
   .combined-content {
     flex-direction: column;
+  }
+  
+  /* 用户协议弹窗响应式 */
+  .agreement-modal {
+    max-height: 85vh;
+    margin: 10px;
+  }
+  
+  .modal-header {
+    padding: 15px 20px;
+  }
+  
+  .modal-header h2 {
+    font-size: 1.2rem;
+  }
+  
+  .modal-content {
+    padding: 15px 20px;
+  }
+  
+  .agreement-section {
+    padding: 15px;
+  }
+  
+  .footer-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .btn-reject,
+  .btn-agree {
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .scroll-progress {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .progress-text {
+    text-align: center;
+    min-width: auto;
   }
 }
 
