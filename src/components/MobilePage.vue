@@ -1351,14 +1351,15 @@ export default {
   flex-direction: column;
   padding: 10px;
   background-color: #f5f5f5;
-  overflow: hidden;
-  height: 100vh;
+  overflow: auto;
   box-sizing: border-box;
+  width: 100%;
+  min-width: 320px;
 }
 
 .header {
   margin-bottom: 20px;
-  padding: 20px;
+  padding: 15px 20px;
   border-radius: 10px;
   background: linear-gradient(135deg, #2c3e50, #4a6572);
   color: white;
@@ -1369,7 +1370,8 @@ export default {
 
 .header h1 {
   margin: 0;
-  font-size: 1.8rem;
+  font-size: clamp(1.2rem, 4vw, 1.8rem);
+  word-break: break-word;
 }
 
 .main-content {
@@ -1377,41 +1379,48 @@ export default {
   display: grid;
   grid-template-columns: 1fr;
   gap: 20px;
-  overflow: hidden;
+  width: 100%;
   min-height: 0;
 }
 
 .module {
   background-color: white;
   border-radius: 12px;
-  padding: 20px;
+  padding: 15px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   border: 1px solid #eaeaea;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  min-height: 0;
+  min-height: 300px;
+  max-height: none;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .module h2 {
   margin-top: 0;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
   color: #2c3e50;
   border-bottom: 2px solid #3498db;
-  padding-bottom: 12px;
-  font-size: 1.4rem;
+  padding-bottom: 10px;
+  font-size: clamp(1.1rem, 3vw, 1.4rem);
   flex-shrink: 0;
+  word-break: break-word;
 }
 
 .module-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
   border-bottom: 2px solid #3498db;
-  padding-bottom: 12px;
+  padding-bottom: 10px;
   flex-shrink: 0;
   position: relative;
+  width: 100%;
 }
 
 .module-header h2 {
@@ -1425,6 +1434,8 @@ export default {
   min-height: 0;
   overflow-y: auto;
   padding-right: 5px;
+  width: 100%;
+  position: relative;
 }
 
 .module-content::-webkit-scrollbar {
@@ -1622,10 +1633,11 @@ export default {
 }
 
 .preview-content {
-  height: 100%;
+  height: auto;
   display: flex;
   flex-direction: column;
-  min-height: 0;
+  min-height: 300px;
+  width: 100%;
 }
 
 .content-display {
@@ -1640,7 +1652,7 @@ export default {
 .reasoning-view,
 .combined-view {
   flex: 1;
-  min-height: 200px;
+  min-height: 250px;
   max-height: 100%;
   overflow-y: auto;
   background: white;
@@ -1963,7 +1975,7 @@ export default {
   border-radius: 6px;
   white-space: pre-wrap;
   font-size: 15px;
-  line-height: 1.5;
+  line-height: 1.8;
   font-family: 'Georgia', serif;
 }
 
@@ -2258,16 +2270,19 @@ label {
 @media (min-width: 768px) {
   .main-content {
     grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 15px;
   }
 
   .parameter-settings {
     grid-column: 1 / 3;
+    grid-row: 1;
   }
 
   .parameter-settings .module-content {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
+    gap: 15px;
   }
 
   .parameter-settings .config-section {
@@ -2275,107 +2290,259 @@ label {
     display: flex;
     flex-direction: column;
   }
+
+  .preview {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .history {
+    grid-column: 2;
+    grid-row: 2;
+  }
 }
 
 @media (min-width: 1024px) {
+  .app-container {
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
   .main-content {
     grid-template-columns: 1fr 2fr 1fr;
+    grid-template-rows: auto;
+    gap: 20px;
   }
 
   .parameter-settings {
-    grid-column: auto;
+    grid-column: 1;
+    grid-row: 1;
   }
 
   .parameter-settings .module-content {
     display: flex;
     flex-direction: column;
     grid-template-columns: none;
+    overflow-y: auto;
+  }
+
+  .preview {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .history {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .floating-generating-indicator {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    z-index: 100;
+    min-width: 350px;
+    max-width: 400px;
   }
 }
 
 @media (max-width: 767px) {
+  .app-container {
+    padding: 8px;
+    overflow-x: hidden;
+  }
+
   .main-content {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    width: 100%;
   }
 
   .module {
-    min-height: 300px;
+    min-height: 250px;
+    padding: 12px;
+    margin-bottom: 0;
+  }
+
+  .module-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .header-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .header-actions button {
+    width: 100%;
+  }
+
+  .input-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .character-juese {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .input-with-button {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .input-with-button .input-field {
+    width: 100%;
   }
 
   .history-list {
     max-height: 400px;
   }
 
+  .content-view,
+  .reasoning-view,
+  .combined-view {
+    min-height: 200px;
+  }
+
   .floating-generating-indicator {
     position: fixed;
-    top: auto;
     bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
-    min-width: 90%;
-    max-width: 90%;
+    width: 90%;
+    max-width: 400px;
+    z-index: 1000;
   }
 
-  .input-row {
-    grid-template-columns: 1fr;
-  }
-
-  .character-juese {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-
-  .input-with-button {
+  .generating-progress {
     flex-direction: column;
-  }
-
-  .module-header {
-    flex-direction: column;
-    gap: 15px;
     text-align: center;
+    padding: 12px;
   }
 
-  .header-actions {
-    flex-direction: column;
-    width: 100%;
+  .progress-spinner {
+    margin-bottom: 10px;
   }
 
-  .preview-actions {
-    flex-direction: column;
+  .content-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 5px;
+  }
+
+  .tab-button {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  input,
+  select,
+  textarea {
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .history-actions {
     flex-wrap: wrap;
+    gap: 6px;
   }
 
-  .content-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .edit-actions {
-    align-self: flex-end;
-  }
-
-  .parameter-actions {
-    flex-direction: column;
-  }
-
-  .content-tabs {
-    flex-wrap: wrap;
-  }
-
-  .tab-button {
+  .history-actions button {
     flex: 1;
-    min-width: 80px;
-    text-align: center;
+    min-width: calc(50% - 6px);
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+}
+
+@media (min-resolution: 144dpi) {
+  .module {
+    padding: 12px;
   }
 
-  .combined-content {
-    flex-direction: column;
+  .header {
+    padding: 12px 15px;
+  }
+
+  .input-field,
+  .textarea-field,
+  .select-field {
+    padding: 8px 10px;
+  }
+}
+
+@media (min-width: 1600px) {
+  .app-container {
+    max-width: 1600px;
+  }
+
+  .main-content {
+    gap: 25px;
+  }
+
+  .module {
+    padding: 25px;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+
+  button,
+  .tab-button {
+    min-height: 44px;
+    padding: 12px 16px;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 320px) {
+  .header h1 {
+    font-size: 1rem;
+  }
+
+  .module h2 {
+    font-size: 1rem;
+  }
+
+  .config-section {
+    padding: 12px;
+  }
+}
+
+.character-juese input,
+.character-juese textarea {
+  max-width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .module-content {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  }
+
+  .module-content::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .module-content::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
   }
 }
 

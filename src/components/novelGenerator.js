@@ -9,7 +9,7 @@ export function countChineseCharacters(str) {
 
 function createOpenAIClient(apiKey) {
     return new OpenAI({
-        baseURL: 'https://api.deepseek.com/v3.2_speciale_expires_on_20251215',
+        baseURL: 'https://api.deepseek.com/v1',
         apiKey: apiKey,
         dangerouslyAllowBrowser: true
     });
@@ -17,22 +17,26 @@ function createOpenAIClient(apiKey) {
 
 export function buildSystemConfig(worldView, perspective, additionalInfo) {
     const config = {
-        "设定": "你是一个专业的小说创作助手，请根据用户要求生成高质量的小说章节内容。",
+        "设定": "你是一个专业的小说创作助手，请根据详细的要求生成高质量的小说章节内容。",
         "世界观设定": worldView,
         "人称视角": perspective,
         "写作要求": {
-            "语言风格": "生动形象，富有文学性",
             "描写重点": "注重环境氛围、人物心理、动作细节",
             "章节结构": "完整的起承转合",
             "字数控制": "3000-4000字为宜"
         },
-        "重要规则": "请直接开始章节内容，不要添加任何开场白、说明或总结性文字。章节结尾要自然收束，不要跳出故事进行评论。"
+        "重要规则": "不要添加任何说明或总结性文字。章节结尾要自然收束，不要跳出故事进行评论。"
     };
 
     if (additionalInfo && additionalInfo.trim()) {
         config["补充信息"] = additionalInfo;
+        
+        if (!config.写作要求.其他要求) {
+            config.写作要求.其他要求 = additionalInfo;
+        } else {
+            config.写作要求.其他要求 += `\n${additionalInfo}`;
+        }
     }
-
     return config;
 }
 
@@ -55,16 +59,29 @@ export function buildUserConfig(chapterNumber, chapterName, plotRequirement, cha
 }
 
 function buildMessages(systemConfig, userConfig) {
+    let systemContent = `你是一个专业的小说创作助手。请严格按照以下要求生成小说章节内容：
+
+【世界观设定】
+${systemConfig.世界观设定}
+
+【人称视角】
+${systemConfig.人称视角}
+
+【写作要求】
+- 语言风格：${systemConfig.写作要求.语言风格}
+- 描写重点：${systemConfig.写作要求.描写重点}
+- 章节结构：${systemConfig.写作要求.章节结构}
+- 字数控制：${systemConfig.写作要求.字数控制}`;
+
+    if (systemConfig.补充信息 && systemConfig.补充信息.trim()) {
+        systemContent += `\n\n【补充信息】\n${systemConfig.补充信息}`;
+    }
+
+    systemContent += `\n\n【重要规则】\n${systemConfig.重要规则}`;
+
     const systemMessage = {
         role: "system",
-        content: `你是一个专业的小说创作助手。请严格按照以下要求生成内容：
-
-世界观：${systemConfig.世界观设定}
-人称视角：${systemConfig.人称视角}
-写作风格：${JSON.stringify(systemConfig.写作要求)}
-特殊要求：${systemConfig.重要规则}
-
-请直接输出小说章节内容，不要添加任何额外的说明、开场白或总结。`
+        content: systemContent
     };
 
     const userMessageContent = [
@@ -85,6 +102,7 @@ function buildMessages(systemConfig, userConfig) {
         content: userMessageContent.join('\n')
     };
 
+    console.log('构建的消息:', { systemMessage, userMessage });
     return [systemMessage, userMessage];
 }
 
@@ -105,7 +123,12 @@ export async function generateContent(params) {
         }
 
         const openai = createOpenAIClient(apiKey);
+
         const messages = buildMessages(systemConfig, userConfig);
+
+        console.log("发送请求到DeepSeek API...");
+        console.log("启用思维链:", enableReasoning);
+        console.log("使用模型:", model);
 
         const requestConfig = {
             messages: messages,
@@ -118,14 +141,22 @@ export async function generateContent(params) {
             requestConfig.extra_body = {
                 thinking: { type: "enabled" }
             };
+            console.log("已启用思维链模式");
+        } else if (enableReasoning && model !== "deepseek-reasoner") {
+            console.warn("只有deepseek-reasoner模型支持思维链，已禁用思维链");
+            requestConfig.temperature = temperature;
         } else {
             requestConfig.temperature = temperature;
         }
 
         const stream = await openai.chat.completions.create(requestConfig);
+
+        console.log("API请求成功，开始流式传输...");
         return stream;
         
     } catch (error) {
+        console.error("API调用失败:", error);
+        
         let errorMessage = "生成失败: ";
         if (error.message.includes("401")) {
             errorMessage += "API密钥无效或已过期";
@@ -135,6 +166,8 @@ export async function generateContent(params) {
             errorMessage += "服务器内部错误，请稍后再试";
         } else if (error.message.includes("network")) {
             errorMessage += "网络连接错误，请检查网络设置";
+        } else if (error.message.includes("thinking")) {
+            errorMessage += "思维链参数设置错误，请检查模型是否支持";
         } else {
             errorMessage += error.message;
         }
@@ -149,6 +182,7 @@ export async function processStream(stream, onContentUpdate) {
     let chineseCount = 0;
     let characterCount = 0;
     let startTime = Date.now();
+    let lastUpdateTime = startTime;
 
     try {
         for await (const chunk of stream) {
@@ -176,6 +210,8 @@ export async function processStream(stream, onContentUpdate) {
                 characterCount = fullContent.length;
                 chineseCount = countChineseCharacters(fullContent);
                 
+                const currentTime = Date.now();
+                
                 if (onContentUpdate) {
                     onContentUpdate({
                         content: fullContent,
@@ -186,9 +222,17 @@ export async function processStream(stream, onContentUpdate) {
                         incrementalReasoning: reasoning || ""
                     });
                 }
+                
+                lastUpdateTime = currentTime;
             }
             
             if (chunk.choices[0]?.finish_reason) {
+                const endTime = Date.now();
+                const duration = (endTime - startTime) / 1000;
+                console.log(`生成完成, 原因: ${chunk.choices[0].finish_reason}`);
+                console.log(`总耗时: ${duration.toFixed(2)}秒`);
+                console.log(`总字符数: ${characterCount}, 中文字符: ${chineseCount}`);
+                console.log(`思维链长度: ${reasoningContent.length}字符`);
                 break;
             }
         }
@@ -205,6 +249,7 @@ export async function processStream(stream, onContentUpdate) {
         };
         
     } catch (error) {
+        console.error("流处理错误:", error);
         return {
             finalContent: fullContent,
             reasoningContent: reasoningContent,
@@ -242,6 +287,7 @@ export async function processNonStreamResponse(stream, onContentUpdate) {
         
         const reasoningContent = response.choices?.[0]?.message?.reasoning_content || "";
         const finalContent = response.choices?.[0]?.message?.content || "";
+        
         const processedContent = postProcessContent(finalContent);
         const chineseCount = countChineseCharacters(processedContent);
         
@@ -264,6 +310,7 @@ export async function processNonStreamResponse(stream, onContentUpdate) {
         };
         
     } catch (error) {
+        console.error("处理非流式响应错误:", error);
         return {
             finalContent: "",
             reasoningContent: "",
@@ -428,6 +475,7 @@ export function createChapterData(chapterTitle, content, reasoningContent = "", 
             enableReasoning: config.enableReasoning || false,
             worldView: config.worldView || "",
             perspective: config.perspective || "",
+            additionalInfo: config.additionalInfo || "",
             characters: config.characters || [],
             plotRequirement: config.plotRequirement || ""
         }
@@ -496,9 +544,9 @@ export function exportMultipleChapters(chapters, format = 'txt', includeReasonin
         case 'json':
             const exportData = {
                 format: 'novel-full-export',
-                version: '1.1',
+                version: '1.2',
                 exportedAt: new Date().toISOString(),
-                generator: 'TaleMaker DS便捷小说生成器',
+                generator: 'TaleMaker DeepSeek便捷小说生成器',
                 chapters: chapters.map(chapter => ({
                     ...chapter,
                     config: chapter.config || {}
