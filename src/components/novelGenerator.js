@@ -9,7 +9,7 @@ export function countChineseCharacters(str) {
 
 function createOpenAIClient(apiKey) {
     return new OpenAI({
-        baseURL: 'https://api.deepseek.com/v1',
+        baseURL:'https://api.deepseek.com',
         apiKey: apiKey,
         dangerouslyAllowBrowser: true
     });
