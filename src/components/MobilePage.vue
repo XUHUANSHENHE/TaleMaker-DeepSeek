@@ -27,26 +27,26 @@
             <div class="input-group">
               <label for="model">模型选择:</label>
               <select v-model="model" id="model" class="select-field">
-                <option value="deepseek-reasoner">DeepSeek Reasoner (支持思考过程)</option>
-                <option value="deepseek-chat">DeepSeek Chat (常规版)</option>
+                <option value="deepseek-v4-pro">DeepSeek Reasoner (支持思考过程)</option>
+                <option value="deepseek-v4-flash">DeepSeek Chat (常规版)</option>
               </select>
             </div>
 
             <div class="input-group">
               <div class="checkbox-group">
                 <input id="enableReasoning" v-model="enableReasoning" type="checkbox" class="checkbox-input"
-                  :disabled="model !== 'deepseek-reasoner'" />
+                  :disabled="model !== 'deepseek-v4-pro'" />
                 <label for="enableReasoning" class="checkbox-label">
                   启用思维链 (展示模型思考过程)
                   <br></br>
-                  <span v-if="model !== 'deepseek-reasoner'" class="disabled-hint">
+                  <span v-if="model !== 'deepseek-v4-pro'" class="disabled-hint">
                     (仅DeepSeek Reasoner模型支持)
                   </span>
                 </label>
               </div>
             </div>
 
-            <div v-if="enableReasoning && model === 'deepseek-reasoner'" class="input-group">
+            <div v-if="enableReasoning && model === 'deepseek-v4-pro'" class="input-group">
               <label for="reasoningDisplay">思维链显示方式:</label>
               <select v-model="reasoningDisplay" id="reasoningDisplay" class="select-field">
                 <option value="separate">独立显示</option>
@@ -363,7 +363,7 @@ export default {
     return {
       apiKey: '',
       showApiKey: false,
-      model: 'deepseek-reasoner',
+      model: 'deepseek-v4-pro',
       enableReasoning: true,
       reasoningDisplay: 'separate',
 
@@ -452,7 +452,7 @@ export default {
   },
   watch: {
     model(newModel) {
-      if (newModel !== 'deepseek-reasoner') {
+      if (newModel !== 'deepseek-v4-pro') {
         this.enableReasoning = false;
         this.reasoningDisplay = 'separate';
       } else {
@@ -650,7 +650,7 @@ export default {
           ? config.characters
           : [{ name: '', setting: '' }];
         this.plotRequirement = config.plotRequirement || '';
-        this.model = config.model || 'deepseek-reasoner';
+        this.model = config.model || 'deepseek-v4-pro';
         this.enableReasoning = config.enableReasoning !== undefined ? config.enableReasoning : true;
         this.reasoningDisplay = config.reasoningDisplay || 'separate';
 
@@ -704,7 +704,7 @@ export default {
         this.chapterName = '';
         this.characters = [{ name: '', setting: '' }];
         this.plotRequirement = '';
-        this.model = 'deepseek-reasoner';
+        this.model = 'deepseek-v4-pro';
         this.enableReasoning = true;
         this.reasoningDisplay = 'separate';
 
@@ -726,7 +726,7 @@ export default {
 
           if (parameters.version === this.parametersVersion) {
             this.apiKey = parameters.apiKey || '';
-            this.model = parameters.model || 'deepseek-reasoner';
+            this.model = parameters.model || 'deepseek-v4-pro';
             this.enableReasoning = parameters.enableReasoning !== undefined ? parameters.enableReasoning : true;
             this.reasoningDisplay = parameters.reasoningDisplay || 'separate';
             this.worldView = parameters.worldView || '';
@@ -805,7 +805,7 @@ export default {
           systemConfig,
           userConfig,
           model: this.model,
-          enableReasoning: this.enableReasoning && this.model === 'deepseek-reasoner'
+          enableReasoning: this.enableReasoning && this.model === 'deepseek-v4-pro'
         });
 
         const result = await processStream(stream, (update) => {
@@ -1228,7 +1228,7 @@ export default {
       }
 
       if (confirm('是否恢复保存的配置参数？')) {
-        this.model = data.parameters.model || 'deepseek-reasoner';
+        this.model = data.parameters.model || 'deepseek-v4-pro';
         this.enableReasoning = data.parameters.enableReasoning !== undefined ? data.parameters.enableReasoning : true;
         this.reasoningDisplay = data.parameters.reasoningDisplay || 'separate';
         this.worldView = data.parameters.worldView || '';
@@ -1264,7 +1264,7 @@ export default {
 
     importLegacyFormat(data) {
       if (data.parameters) {
-        this.model = data.parameters.model || 'deepseek-reasoner';
+        this.model = data.parameters.model || 'deepseek-v4-pro';
         this.enableReasoning = data.parameters.enableReasoning !== undefined ? data.parameters.enableReasoning : true;
         this.reasoningDisplay = data.parameters.reasoningDisplay || 'separate';
         this.worldView = data.parameters.worldView || '';
