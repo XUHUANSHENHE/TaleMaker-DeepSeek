@@ -27,8 +27,8 @@
             <div class="input-group">
               <label for="model">模型选择:</label>
               <select v-model="model" id="model" class="select-field">
-                <option value="deepseek-reasoner">DeepSeek Reasoner (支持思考过程)</option>
-                <option value="deepseek-chat">DeepSeek Chat (常规版)</option>
+                <option value="deepseek-reasoner">DeepSeek-v4-pro (支持思考过程)</option>
+                <option value="deepseek-chat">DeepSeek-v4-flash (常规版)</option>
               </select>
             </div>
 
