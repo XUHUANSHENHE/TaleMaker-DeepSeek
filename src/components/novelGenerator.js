@@ -112,7 +112,7 @@ export async function generateContent(params) {
             apiKey,
             systemConfig = {},
             userConfig = {},
-            model = "deepseek-reasoner",
+            model = "deepseek-v4-pro",
             maxTokens = 64000,
             temperature = 0.7,
             enableReasoning = true
@@ -137,13 +137,13 @@ export async function generateContent(params) {
             stream: true,
         };
 
-        if (enableReasoning && model === "deepseek-reasoner") {
+        if (enableReasoning && model === "deepseek-v4-pro") {
             requestConfig.extra_body = {
                 thinking: { type: "enabled" }
             };
             console.log("已启用思维链模式");
-        } else if (enableReasoning && model !== "deepseek-reasoner") {
-            console.warn("只有deepseek-reasoner模型支持思维链，已禁用思维链");
+        } else if (enableReasoning && model !== "deepseek-v4-pro") {
+            console.warn("只有deepseek-v4-pro模型支持思维链，已禁用思维链");
             requestConfig.temperature = temperature;
         } else {
             requestConfig.temperature = temperature;
@@ -471,7 +471,7 @@ export function createChapterData(chapterTitle, content, reasoningContent = "", 
         isEdited: false,
         imported: false,
         config: {
-            model: config.model || "deepseek-reasoner",
+            model: config.model || "deepseek-v4-pro",
             enableReasoning: config.enableReasoning || false,
             worldView: config.worldView || "",
             perspective: config.perspective || "",
@@ -660,14 +660,14 @@ export function generateModelConfigHelp() {
     return {
         models: [
             {
-                id: 'deepseek-reasoner',
+                id: 'deepseek-v4-pro',
                 name: 'DeepSeek Reasoner',
                 description: '支持思维链推理的模型，能展示模型的思考过程',
                 supportsReasoning: true,
                 maxTokens: 64000
             },
             {
-                id: 'deepseek-chat',
+                id: 'deepseek-v4-flash',
                 name: 'DeepSeek Chat',
                 description: '常规聊天模型，响应速度快',
                 supportsReasoning: false,
